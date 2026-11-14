@@ -1,0 +1,12 @@
+﻿# Secrets & environment variables
+.env
+.env.*
+
+# Python virtual environment & bytecode
+.venv/
+__pycache__/
+*.py[cod]
+
+# Personal Claude Code local overrides
+.claude/settings.local.json
+CLAUDE.local.md

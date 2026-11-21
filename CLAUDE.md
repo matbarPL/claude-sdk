@@ -1,18 +1,26 @@
-# CCDV-F Exam Practice Workspace (`claude-sdk`)
+# StrideCoach (`claude-sdk`)
+
+A Python portfolio project for runners. It also serves as CCDV-F exam practice: each stage exercises a set of exam skills.
 
 ## Environment & Runtime Rules
-- **OS / Shell:** Windows 11 with PowerShell (`.\.venv\Scripts\python.exe`).
-- **Auth:** Direct Anthropic API (`Anthropic()`), loaded via `load_dotenv(".env", override=True)`.
+- **OS / Shell:** Windows 11 with PowerShell. Run Python as `.\.venv\Scripts\python.exe`.
+- **Auth:** Direct Anthropic API via `load_dotenv(".env", override=True)` before creating `Anthropic()`.
 - **Security:** NEVER read, print, or commit `.env`. `.claude/settings.json` blocks `Read(./.env)` and scrubs subprocess env vars (`CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1`).
-- **Cost Guardrail:** Keep all practice scripts on `claude-haiku-4-5-20251001` ($1/$5 per MTok) with small `max_tokens` caps unless a lab specifically tests model-tier differences.
+- **SDK caveat:** The installed `anthropic` Python SDK (2.8.0) does NOT accept `temperature` as a keyword argument in `client.messages.create()` or `client.messages.stream()`. Do not pass it; use the default sampling settings. Any sampling experiment needs a different approach, verified against the installed SDK first.
 
-## Detailed Lab Guides (`labs/`)
-Each lab has a dedicated specification file in `labs/` with objectives, implementation steps, verification commands, and CCDV-F exam traps:
-1. `labs/lab01_messages_streaming.md` -> `lab1_messages.py` (Messages API, token counting, `stop_reason`, SSE streaming)
-2. `labs/lab02_tools_loop.md` -> `lab2_tools.py` (Custom tools, `tool_choice`, parallel `tool_use`, `is_error=True` recovery)
-3. `labs/lab03_structured_context.md` -> `lab3_structured_context.py` (Structured outputs, `strict: true`, XML boundaries, context pruning)
-4. `labs/lab04_caching_batches.md` -> `lab4_caching_batches.py` (Prompt caching breakpoints/TTLs, Message Batches API)
-5. `labs/lab05_workflows_agents.md` -> `lab5_workflows_agents.py` (Workflows vs. agents, subagent isolation, Agent SDK `query()`)
-6. `labs/lab06_mcp_server.md` -> `lab6_mcp_server.py` & `lab6_mcp_client.py` (MCP Tools, Resources, Prompts, `stdio` vs. Streamable HTTP)
-7. `labs/lab07_security_hooks.md` -> `.claude/hooks/pre_tool_guard.py` & `lab7_security_test.py` (`PreToolUse` exit `2` vs. JSON decisions, prompt injection defense)
-8. `labs/lab08_claude_code_errors.md` -> `.claude/rules/python-labs.md` & `lab8_error_triage.py` (Claude Code scopes, headless `-p`, API error classification)
+## Cost & Model Pinning Rule
+- Always pin `model="claude-haiku-4-5-20251001"`. Never use floating `-latest` aliases.
+- Keep `max_tokens <= 300` on every call, including batch request params.
+- Use small `max_tokens` values in verification scripts to keep cost below the lab budget.
+- Use another model only when a stage explicitly tests model-tier differences, and note the reason in the code.
+
+## Architecture Overview
+All application code lives in the `stridecoach/` package. It is built in four stages:
+
+1. **Stage 1 — Core Messages API & Streaming:** Client setup, `messages.create()`, `messages.stream()` with `get_final_message()`, `count_tokens()`, and defensive `stop_reason` handling.
+2. **Stage 2 — Messy Run Note Structured Parser & Prompt Caching:** Parse free-text run notes into structured data with strict schemas and XML boundaries. Add prompt caching breakpoints and measure their effect.
+3. **Stage 3 — VDOT/ACWR Tools, Agent Loop & MCP Training Log Server:** Custom tools for VDOT and acute:chronic workload ratio calculations, a tool-use loop with `is_error=True` recovery, and an MCP server that exposes the training log.
+4. **Stage 4 — Guardrails, Hooks, Evals & Streamlit UI:** Input and output guardrails, `PreToolUse` hooks, an eval harness, and a Streamlit front end.
+
+## Response Handling Rules
+Path-scoped rules for `stridecoach/**/*.py` are in `.claude/rules/stridecoach-python.md`. In short: check `stop_reason` and empty `content` before reading text, scan blocks by `type == "text"`, and log `_request_id`.

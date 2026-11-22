@@ -9,7 +9,6 @@ read (`Read`), and synthesize (`Write`) within strict turn and USD guardrails.
 from pathlib import Path
 from typing import Any
 
-from dotenv import load_dotenv
 from claude_agent_sdk import (
     AssistantMessage,
     ClaudeAgentOptions,
@@ -19,6 +18,7 @@ from claude_agent_sdk import (
     ToolUseBlock,
     query,
 )
+from dotenv import load_dotenv
 
 # Load ANTHROPIC_API_KEY from .env before launching the Agent SDK subprocess.
 load_dotenv(".env", override=True)

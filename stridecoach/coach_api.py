@@ -12,9 +12,9 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-from dotenv import load_dotenv
 from anthropic import Anthropic
 from anthropic.types import Message
+from dotenv import load_dotenv
 
 # Load .env explicitly; the SDK does not read it on its own.
 load_dotenv(".env", override=True)

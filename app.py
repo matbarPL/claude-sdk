@@ -23,6 +23,8 @@ from stridecoach.coach_api import (
 from stridecoach.cost import calculate_call_cost, prune_conversation_history
 from stridecoach.parser import (
     client as parser_client,
+)
+from stridecoach.parser import (
     load_cached_handbook,
     parse_run_note,
     parse_run_note_with_cache,
@@ -86,8 +88,7 @@ def stream_coach_to_ui(api: StrideCoachAPI, messages: list[dict[str, Any]], max_
             max_tokens=max_tokens,
             messages=messages,
         ) as stream:
-            for chunk in stream.text_stream:
-                yield chunk
+            yield from stream.text_stream
             holder["final"] = stream.get_final_message()
 
     st.write_stream(_gen())

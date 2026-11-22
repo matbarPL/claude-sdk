@@ -1,0 +1,10 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "live: calls the Anthropic API and costs money; skipped unless RUN_LIVE_TESTS=1",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"

@@ -40,6 +40,12 @@ def load_cached_handbook() -> str:
     return "<athlete_handbook>\n" + "\n\n---\n\n".join(parts) + "\n</athlete_handbook>"
 
 
+def wrap_run_note(raw_note: str) -> str:
+    """Wrap the note in XML tags. Escape any tag look-alikes so the note cannot close the wrapper early."""
+    safe = raw_note.replace("<raw_run_note>", "&lt;raw_run_note&gt;").replace("</raw_run_note>", "&lt;/raw_run_note&gt;")
+    return f"<raw_run_note>{safe}</raw_run_note>"
+
+
 def _call_parser(system: Any, raw_note: str) -> Message:
     """messages.parse() raises ValidationError on truncated JSON before stop_reason can be checked."""
     try:
@@ -47,7 +53,7 @@ def _call_parser(system: Any, raw_note: str) -> Message:
             model=MODEL,
             max_tokens=250,
             system=system,
-            messages=[{"role": "user", "content": f"<raw_run_note>{raw_note}</raw_run_note>"}],
+            messages=[{"role": "user", "content": wrap_run_note(raw_note)}],
             output_format=StructuredWorkout,
         )
     except ValidationError as e:
